@@ -30,7 +30,7 @@ int seekState = 0, seekTimer = 0, eyesDamageTimer = 0, eyesDamageAccumulator = 0
 
 float screechX = 0.0f, screechY = 0.0f, screechZ = 0.0f, screechOffsetX = 0.0f, screechOffsetY = 0.0f, screechOffsetZ = 0.0f;
 float rushStartTimer = 1.0f, rushZ = 0.0f, rushTargetZ = 0.0f;
-float seekZ = 0.0f, seekSpeed = 0.0f, seekMaxSpeed = 0.076f; 
+float seekZ = 0.0f, seekX = 0.0f, seekSpeed = 0.0f, seekMaxSpeed = 0.076f;
 
 bool figureActive = false;
 int figureState = 0; 
