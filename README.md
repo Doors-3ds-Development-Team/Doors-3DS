@@ -49,7 +49,6 @@ I enjoy playing Doors, and since there aren't really many good horror games for 
 * **Download**: Grab the latest `.cia` or `.3dsx` on the [Releases](../../releases) page, or scan this QR code with FBI
 <img width="270" height="270" alt="image" src="https://github.com/user-attachments/assets/32cf49e3-d143-4f15-a91d-8a38393cce94" />
 
-
 * **Discord**: [Join the server](https://discord.gg/h5JVJbSyu8) for updates, technical help, and suggestions. 
 
 ---
@@ -62,7 +61,7 @@ I’m a fan of the original game and noticed that the 3DS is pretty short on goo
 
 **The game has no sound / "Missing DSP Firmware" error.**
 
-You just need to dump your system's sound firmware. Run the **DSP1** homebrew app on your 3DS once; it will create the `dspfirm.cdc` file on your SD card, and audio will work fine after that.
+Open the Luma3DS Rosalina menu by pressing **L + D-Pad Down + Select**, navigate to **Miscellaneous options**, and select **Dump DSP firmware**. This will create the `dspfirm.cdc` file on your SD card.
 
 **Why is the game locked at 30 FPS?**
 
