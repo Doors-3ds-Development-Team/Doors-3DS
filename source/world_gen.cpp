@@ -198,7 +198,7 @@ void buildWorld(int cChunk, int pRm) {
     collisions.clear();
     
     float floorU = TEX_FLOOR.u, floorV = TEX_FLOOR.v, floorUW = TEX_FLOOR.uw, floorVH = TEX_FLOOR.vh;
-    float wallU = TEX_WALL.u, wallV = TEX_WALL.v, wallUW = TEX_WALL.uw, wallVH = TEX_WALL.vh;      
+    float wallU = TEX_WALL.u, wallV = TEX_WALL.v, wallUW = TEX_WALL.uw, wallVH = TEX_WALL.vh;     
     float cR = 1.0f, cG = 1.0f, cB = 1.0f, floorScale = 2.4f, wallScale = 2.4f;  
 
     int st = pRm; 
@@ -573,10 +573,10 @@ void buildWorld(int cChunk, int pRm) {
                     float zC = z - 2.5f - (s * 2.5f); 
                     int t = rooms[i].slotType[s]; 
                     
-                    if (t == 1) buildCabinet(zC, true, L, 0, 0); 
-                    else if (t == 2) buildCabinet(zC, false, L, 0, 0); 
-                    else if (t == 5) buildDresser(zC, true, rooms[i].animMain[s], rooms[i].slotItem[s], L, 0, true); 
-                    else if (t == 6) buildDresser(zC, false, rooms[i].animMain[s], rooms[i].slotItem[s], L, 0, true); 
+                    if (t == 1) buildCabinet(zC, true, L); 
+                    else if (t == 2) buildCabinet(zC, false, L); 
+                    else if (t == 5) buildDresser(zC, true, rooms[i].animMain[s], rooms[i].slotItem[s], L); 
+                    else if (t == 6) buildDresser(zC, false, rooms[i].animMain[s], rooms[i].slotItem[s], L); 
                 }
                 for (int p = 0; p < rooms[i].pCount; p++) { 
                     float pZ = rooms[i].pZ[p], pH = rooms[i].pH[p], pW = rooms[i].pW[p], pY = rooms[i].pY[p]; 
