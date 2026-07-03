@@ -107,15 +107,11 @@ int main() {
         while (aptMainLoop()) { 
             hidScanInput(); 
             if (hidKeysDown() & KEY_START) break; 
-            gfxFlushBuffers(); 
-            gfxSwapBuffers(); 
-            gspWaitForVBlank(); 
+            gfxFlushBuffers(); gfxSwapBuffers(); gspWaitForVBlank(); 
         } 
         if(audio_ok) ndspExit(); 
         C3D_TexDelete(&atlasTex); 
-        romfsExit(); 
-        C3D_Fini(); 
-        gfxExit(); 
+        romfsExit(); C3D_Fini(); gfxExit(); 
         return 0; 
     }
     
@@ -229,8 +225,7 @@ int main() {
             }
             if (totalFrames % 5 == 0) {
                 printf("\x1b[1;1H==============================\n");
-                printf("          LOADING...          \n");
-                printf("==============================\n\x1b[0J");
+                printf("          LOADING...          \n==============================\n\x1b[0J");
             }
         } else if (gameState == 2) {
             
@@ -364,7 +359,7 @@ int main() {
                     if (!target && val > 0.0f) { val -= 0.15f; if (val < 0.0f) val = 0.0f; return true; } 
                     return false; 
                 };
-                for (int s = 0; s < 3; s++) {
+                for (int s = 0; s < 3; s++) { 
                     if (stepAnim(rooms[playerCurrentRoom].drawerOpen[s], rooms[playerCurrentRoom].animMain[s])) animActive = true; 
                     if (rooms[playerCurrentRoom].hasLeftRoom) { 
                         if (stepAnim(rooms[playerCurrentRoom].leftRoomDrawerOpenL[s], rooms[playerCurrentRoom].animLL[s])) animActive = true; 
@@ -381,10 +376,7 @@ int main() {
             // UI drawing
             if (totalFrames % 5 == 0) {
                 static bool prevScreech = false; 
-                if (screechActive != prevScreech) { 
-                    consoleClear(); 
-                    prevScreech = screechActive; 
-                }
+                if (screechActive != prevScreech) { consoleClear(); prevScreech = screechActive; }
                 
                 printf("\x1b[1;1H==============================\n");
                 
@@ -420,10 +412,7 @@ int main() {
                         printf("                            \x1b[K\n\n"); 
                     } else if (isGlitch) { 
                         char g1[4], g2[4];
-                        for(int i=0; i<3; i++) { 
-                            g1[i] = symbols[rand()%8]; 
-                            g2[i] = symbols[rand()%8]; 
-                        }
+                        for(int i=0; i<3; i++) { g1[i] = symbols[rand()%8]; g2[i] = symbols[rand()%8]; }
                         g1[3] = '\0'; g2[3] = '\0'; 
                         printf(" Current Room : %s         \x1b[K\n Next Door     : %s         \x1b[K\n                            \x1b[K\n\n", g1, g2); 
                     } else if (uiRoom >= 0 && uiRoom < TOTAL_ROOMS) {
@@ -635,7 +624,7 @@ int main() {
                             if (fabsf(camX - rooms[playerCurrentRoom].pW[h]) < 0.6f && fabsf(camZ - rooms[playerCurrentRoom].pZ[h]) < 0.6f) {
                                 if (rooms[playerCurrentRoom].pSide[h] == 0 && !isDead && messageTimer <= 0) {
                                     playerHealth -= 40; 
-                                    flashRedFrames = 15;
+                                    flashRedFrames = 15; // <-- Fire flash applied here!
                                     sprintf(uiMessage, "Burned! (-40 HP)"); messageTimer = 30;
                                     if (playerHealth <= 0) { isDead = true; if (audio_ok) ndspChnWaveBufClear(7); }
                                 } else if (rooms[playerCurrentRoom].pSide[h] == 1 && !isDead && !isCrouching) {
@@ -1427,7 +1416,6 @@ int main() {
     
     C3D_TexDelete(&atlasTex); 
     if (hasSeekTex) C3D_TexDelete(&seekTex); 
-    
     linearFree(vbo_main); 
     romfsExit(); 
     C3D_Fini(); 
