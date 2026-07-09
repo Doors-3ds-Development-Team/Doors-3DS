@@ -8,6 +8,9 @@
 #include <vector>
 #include <time.h>
 #include "vshader_shbin.h"
+#include <string>
+#include <thread>
+#include <chrono>
 
 #include "game_state.h"
 #include "render_utils.h"
@@ -36,6 +39,18 @@ int main() {
     ndspWaveBuf sPsst={0}, sAttack={0}, sCaught={0}, sDoor={0}, sLockedDoor={0}, sDupeAttack={0}, sRushScream={0}, sEyesAppear={0}, sEyesGarble={0}, sEyesAttack={0}, sEyesHit={0}, sSeekRise={0}, sSeekChase={0}, sSeekEscaped={0}, sDeath={0}, sElevatorJam={0}, sElevatorJamEnd={0};
     ndspWaveBuf sCoinsCollect={0}, sDarkRoomEnter={0}, sDrawerClose={0}, sDrawerOpen={0}, sLightsFlicker={0}, sWardrobeEnter={0}, sWardrobeExit={0};
 
+    const char* Models = "romfs:/Models/";
+    const char* Model_Animations = "romfs:/Models/Animations/";
+    const char* Model_Textures = "romfs:/Models/Textures/";
+
+    const char* Music = "romfs:/Sounds/Music/";
+    const char* Misc = "romfs:/Sounds/Misc/";
+    const char* Effects = "romfs:/Sounds/Effects/";
+    const char* Entity_Sounds = "romfs:/Sounds/Effects/Entities/";
+    const char* Player_Sounds = "romfs:/Sounds/Effects/Player/";
+    const char* Item_Sounds = "romfs:/Sounds/Effects/Items/";
+    const char* World_Sounds = "romfs:/Sounds/Effects/World/";
+
     if (audio_ok) { 
         ndspSetOutputMode(NDSP_OUTPUT_STEREO); 
         for (int i = 0; i <= 12; i++) {
@@ -44,32 +59,32 @@ int main() {
             ndspChnSetFormat(i, NDSP_FORMAT_MONO_PCM16);
         } 
         
-        sPsst = loadWav("romfs:/Screech_Psst.wav"); 
-        sAttack = loadWav("romfs:/Screech_Attack.wav"); 
-        sCaught = loadWav("romfs:/Screech_Caught.wav"); 
-        sDoor = loadWav("romfs:/Door_Open.wav"); 
-        sLockedDoor = loadWav("romfs:/Locked_Door.wav"); 
-        sDupeAttack = loadWav("romfs:/Dupe_Attack.wav"); 
-        sRushScream = loadWav("romfs:/Rush_Scream.wav"); 
-        sEyesAppear = loadWav("romfs:/Eyes_Appear.wav"); 
-        sEyesGarble = loadWav("romfs:/Eyes_Garble.wav"); 
+        sPsst = loadWav(Entity_Sounds, "Screech_Psst.wav"); 
+        sAttack = loadWav(Entity_Sounds, "Screech_Attack.wav");
+        sCaught = loadWav(Entity_Sounds, "Screech_Caught.wav");
+        sDoor = loadWav(World_Sounds, "Door_Open.wav"); 
+        sLockedDoor = loadWav(World_Sounds, "Locked_Door.wav");
+        sDupeAttack = loadWav(Entity_Sounds, "Dupe_Attack.wav");
+        sRushScream = loadWav(Entity_Sounds, "Rush_Scream.wav");
+        sEyesAppear = loadWav(Entity_Sounds, "Eyes_Appear.wav");
+        sEyesGarble = loadWav(Entity_Sounds, "Eyes_Garble.wav");
         sEyesGarble.looping = true; 
-        sEyesAttack = loadWav("romfs:/Eyes_Attack.wav"); 
-        sEyesHit = loadWav("romfs:/Eyes_Hit.wav"); 
-        sSeekRise = loadWav("romfs:/Seek_Rise.wav"); 
-        sSeekChase = loadWav("romfs:/Seek_Chase.wav"); 
+        sEyesAttack = loadWav(Entity_Sounds, "Eyes_Attack.wav");
+        sEyesHit = loadWav(Entity_Sounds, "Eyes_Hit.wav");
+        sSeekRise = loadWav(Music, "Seek_Rise.wav"); 
+        sSeekChase = loadWav(Music, "Seek_Chase.wav");
         sSeekChase.looping = true; 
-        sSeekEscaped = loadWav("romfs:/Seek_Escaped.wav"); 
-        sDeath = loadWav("romfs:/Player_Death.wav"); 
-        sElevatorJam = loadWav("romfs:/Elevator_Jam.wav"); 
-        sElevatorJamEnd = loadWav("romfs:/Elevator_Jam_End.wav"); 
-        sCoinsCollect = loadWav("romfs:/Coins_Collect.wav"); 
-        sDarkRoomEnter = loadWav("romfs:/Dark_Room_Enter.wav"); 
-        sDrawerClose = loadWav("romfs:/Drawer_Close.wav"); 
-        sDrawerOpen = loadWav("romfs:/Drawer_Open.wav"); 
-        sLightsFlicker = loadWav("romfs:/Lights_Flicker.wav"); 
-        sWardrobeEnter = loadWav("romfs:/Wardrobe_Enter.wav"); 
-        sWardrobeExit = loadWav("romfs:/Wardrobe_Exit.wav");
+        sSeekEscaped = loadWav(Music, "Seek_Escaped.wav");
+        sDeath = loadWav(Player_Sounds, "Player_Death.wav"); 
+        sElevatorJam = loadWav(Music, "Elevator_Jam.wav");
+        sElevatorJamEnd = loadWav(Music, "Elevator_Jam_End.wav");
+        sCoinsCollect = loadWav(Item_Sounds, "Coins_Collect.wav"); 
+        sDarkRoomEnter = loadWav(World_Sounds, "Dark_Room_Enter.wav");
+        sDrawerClose = loadWav(World_Sounds, "Drawer_Close.wav");
+        sDrawerOpen = loadWav(World_Sounds, "Drawer_Open.wav");
+        sLightsFlicker = loadWav(World_Sounds, "Lights_Flicker.wav");
+        sWardrobeEnter = loadWav(World_Sounds, "Wardrobe_Enter.wav");
+        sWardrobeExit = loadWav(World_Sounds, "Wardrobe_Exit.wav");
     }
 
     // GPU setup
@@ -78,14 +93,24 @@ int main() {
     C3D_RenderTargetSetOutput(target, GFX_TOP, GFX_LEFT, DISPLAY_TRANSFER_FLAGS);
     
     // Texture loading
-    hasAtlas = loadTextureFromFile("romfs:/atlas.t3x", &atlasTex);
+    hasAtlas = loadTextureFromFile("romfs:/", "atlas.t3x", &atlasTex);
     
     C3D_Tex seekTex; 
-    bool hasSeekTex = loadTextureFromFile("romfs:/seek.t3x", &seekTex);
+    bool hasSeekTex = loadTextureFromFile("romfs:/", "seek.t3x", &seekTex);
 
     // 3D Model Loading
     MD2Model seekModel;
-    bool hasSeekModel = seekModel.load("romfs:/seek.md2");
+    MD2Model seekModelRunAnim;
+    MD2Model seekModelIntroClip1;
+    MD2Model seekModelIntroClip2;
+    MD2Model seekModelIntroClip3;
+    MD2Model seekModelIntroClip4;
+    bool hasSeekModel = seekModel.load(Models, false, "seek.md2");
+    bool hasSeekRunAnim = seekModelRunAnim.load(Model_Animations, true, "seek_run_anim.md2");
+    bool hasSeekIntroClip1 = seekModelIntroClip1.load(Model_Animations, true, "seek_intro_clip1.md2");
+    bool hasSeekIntroClip2 = seekModelIntroClip2.load(Model_Animations, true, "seek_intro_clip2.md2");
+    bool hasSeekIntroClip3 = seekModelIntroClip3.load(Model_Animations, true, "seek_intro_clip3.md2");
+    bool hasSeekIntroClip4 = seekModelIntroClip4.load(Model_Animations, true, "seek_intro_clip4.md2");
     if (!hasSeekModel) {
         printf("\x1b[33m[WARNING] Could not load seek.md2!\x1b[0m\n");
     }
@@ -107,11 +132,15 @@ int main() {
         while (aptMainLoop()) { 
             hidScanInput(); 
             if (hidKeysDown() & KEY_START) break; 
-            gfxFlushBuffers(); gfxSwapBuffers(); gspWaitForVBlank(); 
+            gfxFlushBuffers(); 
+            gfxSwapBuffers(); 
+            gspWaitForVBlank(); 
         } 
         if(audio_ok) ndspExit(); 
         C3D_TexDelete(&atlasTex); 
-        romfsExit(); C3D_Fini(); gfxExit(); 
+        romfsExit(); 
+        C3D_Fini(); 
+        gfxExit(); 
         return 0; 
     }
     
@@ -185,7 +214,7 @@ int main() {
                 hideState = NOT_HIDING; playerHealth = 100; screechActive = false; screechState = 0; 
                 flashRedFrames = 0; playerCoins = 0; screechCooldown = 900; rushActive = false; 
                 rushState = 0; rushCooldown = 0; messageTimer = 0; inElevator = true; 
-                elevatorTimer = 796; elevatorDoorsOpen = false; elevatorClosing = false; 
+                elevatorTimer = 796; elevatorDoorsOpen = false; elevatorClosing = false;
                 elevatorDoorOffset = 0; elevatorJamFinished = false; 
                 
                 camX = 0; camZ = 7.5f; camYaw = 0; camPitch = 0; 
@@ -225,7 +254,8 @@ int main() {
             }
             if (totalFrames % 5 == 0) {
                 printf("\x1b[1;1H==============================\n");
-                printf("          LOADING...          \n==============================\n\x1b[0J");
+                printf("          LOADING...          \n");
+                printf("==============================\n\x1b[0J");
             }
         } else if (gameState == 2) {
             
@@ -359,7 +389,7 @@ int main() {
                     if (!target && val > 0.0f) { val -= 0.15f; if (val < 0.0f) val = 0.0f; return true; } 
                     return false; 
                 };
-                for (int s = 0; s < 3; s++) { 
+                for (int s = 0; s < 3; s++) {
                     if (stepAnim(rooms[playerCurrentRoom].drawerOpen[s], rooms[playerCurrentRoom].animMain[s])) animActive = true; 
                     if (rooms[playerCurrentRoom].hasLeftRoom) { 
                         if (stepAnim(rooms[playerCurrentRoom].leftRoomDrawerOpenL[s], rooms[playerCurrentRoom].animLL[s])) animActive = true; 
@@ -376,7 +406,10 @@ int main() {
             // UI drawing
             if (totalFrames % 5 == 0) {
                 static bool prevScreech = false; 
-                if (screechActive != prevScreech) { consoleClear(); prevScreech = screechActive; }
+                if (screechActive != prevScreech) { 
+                    consoleClear(); 
+                    prevScreech = screechActive; 
+                }
                 
                 printf("\x1b[1;1H==============================\n");
                 
@@ -412,7 +445,10 @@ int main() {
                         printf("                            \x1b[K\n\n"); 
                     } else if (isGlitch) { 
                         char g1[4], g2[4];
-                        for(int i=0; i<3; i++) { g1[i] = symbols[rand()%8]; g2[i] = symbols[rand()%8]; }
+                        for(int i=0; i<3; i++) { 
+                            g1[i] = symbols[rand()%8]; 
+                            g2[i] = symbols[rand()%8]; 
+                        }
                         g1[3] = '\0'; g2[3] = '\0'; 
                         printf(" Current Room : %s         \x1b[K\n Next Door     : %s         \x1b[K\n                            \x1b[K\n\n", g1, g2); 
                     } else if (uiRoom >= 0 && uiRoom < TOTAL_ROOMS) {
@@ -624,7 +660,7 @@ int main() {
                             if (fabsf(camX - rooms[playerCurrentRoom].pW[h]) < 0.6f && fabsf(camZ - rooms[playerCurrentRoom].pZ[h]) < 0.6f) {
                                 if (rooms[playerCurrentRoom].pSide[h] == 0 && !isDead && messageTimer <= 0) {
                                     playerHealth -= 40; 
-                                    flashRedFrames = 15; // <-- Fire flash applied here!
+                                    flashRedFrames = 15;
                                     sprintf(uiMessage, "Burned! (-40 HP)"); messageTimer = 30;
                                     if (playerHealth <= 0) { isDead = true; if (audio_ok) ndspChnWaveBufClear(7); }
                                 } else if (rooms[playerCurrentRoom].pSide[h] == 1 && !isDead && !isCrouching) {
@@ -1207,20 +1243,128 @@ int main() {
                 float floorCorrectionY = ((seekScale - 0.08f) / 0.08f) * 0.5f; 
 
                 if (playerCurrentRoom == -1) { 
-                    // Draw in Lobby
-                    static float seekAnimTime = 0.0f;
-                    seekAnimTime += 0.2f; 
-                    if (seekModel.numFrames > 0) {
-                        int currentFrame = ((int)seekAnimTime) % seekModel.numFrames;
-                        seekModel.draw(currentFrame, 0.0f, 0.0f + floorCorrectionY, 2.0f, seekScale, 1.0f, 3.14159f);
+                    if (hasSeekRunAnim && hasSeekIntroClip1 && hasSeekIntroClip2 && hasSeekIntroClip3 && hasSeekIntroClip4) {
+                        static int test = 0;
+                        static float seekAnimTime = 0.0f;
+                        static int last_frame = 0;
+                        if (test < 1) {
+                            if (seekModelIntroClip1.numFrames > 0) {
+                                int currentFrame = ((int)seekAnimTime) % seekModelIntroClip1.numFrames;
+                                if (currentFrame < last_frame) {
+                                    sprintf(uiMessage, "animation completed");
+                                    messageTimer = 50;
+                                    test = 1;
+                                    seekModel.draw(seekModelIntroClip2, 1, 0.0f, 0.0f + floorCorrectionY, 2.0f, seekScale, 1.0f, 3.14159f);
+                                    seekAnimTime = 0.0f;
+                                    last_frame = -1;
+                                }
+                                else {
+                                    if (last_frame != currentFrame) {
+                                        seekModel.draw(seekModelIntroClip1, currentFrame, 0.0f, 0.0f + floorCorrectionY, 2.0f, seekScale, 1.0f, 3.14159f);
+                                        last_frame = currentFrame;
+                                    }
+                                    seekAnimTime += 1.0f;
+                                }
+                            }
+                        }
+                        else if (test < 2) {
+                            if (seekModelIntroClip2.numFrames > 0) {
+                                int currentFrame = ((int)seekAnimTime) % seekModelIntroClip2.numFrames;
+                                if (currentFrame < last_frame) {
+                                    sprintf(uiMessage, "animation completed");
+                                    messageTimer = 50;
+                                    test = 2;
+                                    seekModel.draw(seekModelIntroClip3, 1, 0.0f, 0.0f + floorCorrectionY, 2.0f, seekScale, 1.0f, 3.14159f);
+                                    seekAnimTime = 0.0f;
+                                    last_frame = -1;
+                                }
+                                else {
+                                    if (last_frame != currentFrame) {
+                                        seekModel.draw(seekModelIntroClip2, currentFrame, 0.0f, 0.0f + floorCorrectionY, 2.0f, seekScale, 1.0f, 3.14159f);
+                                        last_frame = currentFrame;
+                                    }
+                                    seekAnimTime += 1.0f;
+                                }
+                            }
+                        }
+                        else if (test < 3) {
+                            if (seekModelIntroClip3.numFrames > 0) {
+                                int currentFrame = ((int)seekAnimTime) % seekModelIntroClip3.numFrames;
+                                if (currentFrame < last_frame) {
+                                    sprintf(uiMessage, "animation completed");
+                                    messageTimer = 50;
+                                    test = 3;
+                                    seekModel.draw(seekModelIntroClip4, 1, 0.0f, 0.0f + floorCorrectionY, 2.0f, seekScale, 1.0f, 3.14159f);
+                                    seekAnimTime = 0.0f;
+                                    last_frame = -1;
+                                }
+                                else {
+                                    if (last_frame != currentFrame) {
+                                        seekModel.draw(seekModelIntroClip3, currentFrame, 0.0f, 0.0f + floorCorrectionY, 2.0f, seekScale, 1.0f, 3.14159f);
+                                        last_frame = currentFrame;
+                                    }
+                                    seekAnimTime += 1.0f;
+                                }
+                            }
+                        }
+                        else if (test < 4) {
+                            if (seekModelIntroClip4.numFrames > 0) {
+                                int currentFrame = ((int)seekAnimTime) % seekModelIntroClip4.numFrames;
+                                if (currentFrame < last_frame) {
+                                    sprintf(uiMessage, "animation completed");
+                                    messageTimer = 50;
+                                    test = 4;
+                                    seekModel.draw(seekModelRunAnim, 1, 0.0f, 0.0f + floorCorrectionY, 2.0f, seekScale, 1.0f, 3.14159f);
+                                    seekAnimTime = 0.0f;
+                                    last_frame = -1;
+                                }
+                                else {
+                                    if (last_frame != currentFrame) {
+                                        seekModel.draw(seekModelIntroClip4, currentFrame, 0.0f, 0.0f + floorCorrectionY, 2.0f, seekScale, 1.0f, 3.14159f);
+                                        last_frame = currentFrame;
+                                    }
+                                    seekAnimTime += 1.0f;
+                                }
+                            }
+                        }
+                        else if (test < 50) {
+                            if (seekModelRunAnim.numFrames > 0) {
+                                int currentFrame = ((int)seekAnimTime) % seekModelRunAnim.numFrames;
+                                if (last_frame != currentFrame) {
+                                    seekModel.draw(seekModelRunAnim, currentFrame, 0.0f, 0.0f + floorCorrectionY, 2.0f, seekScale, 1.0f, 3.14159f);
+                                    test += 1;
+                                    last_frame = currentFrame;
+                                }
+                                seekAnimTime += 1.0f;
+                            }
+                        }
+                        else {
+                            last_frame = -1;
+                            seekAnimTime = 0.0f;
+                            seekModel.draw(seekModelIntroClip1, 0, 0.0f, 0.0f + floorCorrectionY, 2.0f, seekScale, 1.0f, 3.14159f);
+                            test = -1;
+                        }
                     }
+                    else {
+                        seekModel.draw(seekModel, 0, 0.0f, 0.0f + floorCorrectionY, 2.0f, seekScale, 1.0f, 3.14159f);
+                    }
+                    
                 } else if (seekActive) {
                     // Draw chasing player
                     static float seekRunAnimTime = 0.0f;
                     seekRunAnimTime += (seekState == 2) ? 0.4f : 0.1f; 
-                    if (seekModel.numFrames > 0) {
-                        int currentFrame = ((int)seekRunAnimTime) % seekModel.numFrames;
-                        seekModel.draw(currentFrame, 0.0f, -0.9f + floorCorrectionY, -seekZ, seekScale, 1.0f, 3.14159f);
+                    if (hasSeekRunAnim) {
+                        if (seekModelRunAnim.numFrames > 0) {
+                            int currentFrame = ((int)seekRunAnimTime) % seekModelRunAnim.numFrames;
+                            // He now renders at his absolute spatial coords, and calculates rotation to face the player
+                            float targetSeekX = seekX;
+                            float targetSeekZ = seekZ;
+                            float rot = atan2f(camX - targetSeekX, camZ - targetSeekZ);
+                            seekModel.draw(seekModelRunAnim, currentFrame, targetSeekX, -0.9f + floorCorrectionY, -targetSeekZ, seekScale, 1.0f, rot);
+                        }
+                    }
+                    else {
+                        seekModel.draw(seekModel, 0, 0.0f, 0.0f + floorCorrectionY, 2.0f, seekScale, 1.0f, 3.14159f);
                     }
                 }
             }
@@ -1416,6 +1560,7 @@ int main() {
     
     C3D_TexDelete(&atlasTex); 
     if (hasSeekTex) C3D_TexDelete(&seekTex); 
+    
     linearFree(vbo_main); 
     romfsExit(); 
     C3D_Fini(); 
