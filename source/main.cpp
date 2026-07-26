@@ -1270,13 +1270,13 @@ int main() {
                                     sprintf(uiMessage, "animation completed");
                                     messageTimer = 50;
                                     test = 1;
-                                    seekModel.draw(screechModelAttackAnim, 1, 1.0f, 1.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
+                                    screechModel.draw(screechModelAttackAnim, 1, 1.0f, 0.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
                                     screechAnimTime = 0.0f;
                                     last_frame = -1;
                                 }
                                 else {
                                     if (last_frame != currentFrame) {
-                                        seekModel.draw(screechModelIdleAnim, currentFrame, 1.0f, 1.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
+                                        screechModel.draw(screechModelIdleAnim, currentFrame, 1.0f, 0.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
                                         last_frame = currentFrame;
                                     }
                                     screechAnimTime += 1.0f;
@@ -1290,13 +1290,13 @@ int main() {
                                     sprintf(uiMessage, "animation completed");
                                     messageTimer = 50;
                                     test = 2;
-                                    seekModel.draw(screechModelIdleAnim, 1, 1.0f, 1.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
+                                    screechModel.draw(screechModelIdleAnim, 1, 1.0f, 0.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
                                     screechAnimTime = 0.0f;
                                     last_frame = -1;
                                 }
                                 else {
                                     if (last_frame != currentFrame) {
-                                        seekModel.draw(screechModelIdleAnim, currentFrame, 1.0f, 1.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
+                                        screechModel.draw(screechModelIdleAnim, currentFrame, 1.0f, 0.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
                                         last_frame = currentFrame;
                                     }
                                     screechAnimTime += 1.0f;
@@ -1306,12 +1306,12 @@ int main() {
                         else {
                             last_frame = -1;
                             screechAnimTime = 0.0f;
-                            seekModel.draw(screechModelIdleAnim, 0, 1.0f, 1.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
+                            screechModel.draw(screechModelIdleAnim, 0, 1.0f, 0.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
                             test = -1;
                         }
                     }
                     else {
-                        seekModel.draw(seekModel, 0, 1.0f, 1.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
+                        screechModel.draw(screechModel, 0, 1.0f, 0.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
                     }
 
                 }
