@@ -23,6 +23,8 @@
 #define MAX_SEEK_VERTS 5000
 
 std::vector<vertex> seek_mesh;
+std::vector<vertex> screech_mesh;
+
 
 int main() {
     // System init
@@ -99,12 +101,25 @@ int main() {
     bool hasSeekTex = loadTextureFromFile("romfs:/", "seek.t3x", &seekTex);
 
     // 3D Model Loading
+    MD2Model screechModel;
+    MD2Model screechModelIdleAnim;
+    MD2Model screechModelAttackAnim;
     MD2Model seekModel;
     MD2Model seekModelRunAnim;
     MD2Model seekModelIntroClip1;
     MD2Model seekModelIntroClip2;
     MD2Model seekModelIntroClip3;
     MD2Model seekModelIntroClip4;
+
+    // Screech Model
+    bool hasScreechModel = screechModel.load(Models, false, "screech.md2");
+    bool hasScreechIdleAnim = screechModelIdleAnim.load(Model_Animations, true, "screech_idle_anim.md2");
+    bool hasScreechAttackAnim = screechModelAttackAnim.load(Model_Animations, true, "screech_attack_anim.md2");
+    if (!hasScreechModel) {
+        printf("\x1b[33m[WARNING] Could not load screech.md2!\x1b[0m\n");
+    }
+
+    // Seek Model
     bool hasSeekModel = seekModel.load(Models, false, "seek.md2");
     bool hasSeekRunAnim = seekModelRunAnim.load(Model_Animations, true, "seek_run_anim.md2");
     bool hasSeekIntroClip1 = seekModelIntroClip1.load(Model_Animations, true, "seek_intro_clip1.md2");
@@ -123,6 +138,7 @@ int main() {
     entity_mesh_colored.reserve(MAX_ENTITY_VERTS); 
     entity_mesh_textured.reserve(MAX_ENTITY_VERTS);
     seek_mesh.reserve(MAX_SEEK_VERTS);
+    screech_mesh.reserve(MAX_SEEK_VERTS);
 
     // ONE giant master buffer for everything!
     void* vbo_main = linearAlloc((MAX_VERTS + MAX_ENTITY_VERTS + MAX_SEEK_VERTS) * sizeof(vertex)); 
@@ -202,7 +218,7 @@ int main() {
         totalFrames++;
         
         int world_total = colored_size + textured_size;
-        int ent_col_size = 0, ent_tex_size = 0, seek_size = 0;
+        int ent_col_size = 0, ent_tex_size = 0, seek_size = 0, screech_size;
 
         // Auto-transition on frame 1 or when restarting
         if ((kDown & KEY_START) || gameState == 0) { 
@@ -1234,6 +1250,93 @@ int main() {
 
             buildEntities(playerCurrentRoom);
 
+            // --- SCREECH GENERATION CALL ---
+            screech_mesh.clear();
+            if (hasScreechModel) {
+                float screechScale = 0.16f; // Doubled Size!
+                // Calculate the Y offset needed to keep his feet on the floor when scaling up
+                // (Models usually scale from their center, pushing their feet into the floor)
+                float floorCorrectionY = ((screechScale - 0.08f) / 0.08f) * 0.5f;
+
+                if (playerCurrentRoom == -1) {
+                    if (hasScreechIdleAnim && hasScreechAttackAnim) {
+                        static int test = 0;
+                        static float screechAnimTime = 0.0f;
+                        static int last_frame = 0;
+                        if (test < 1) {
+                            if (screechModelIdleAnim.numFrames > 0) {
+                                int currentFrame = ((int)screechAnimTime) % screechModelIdleAnim.numFrames;
+                                if (currentFrame < last_frame) {
+                                    sprintf(uiMessage, "animation completed");
+                                    messageTimer = 50;
+                                    test = 1;
+                                    seekModel.draw(screechModelAttackAnim, 1, 1.0f, 1.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
+                                    screechAnimTime = 0.0f;
+                                    last_frame = -1;
+                                }
+                                else {
+                                    if (last_frame != currentFrame) {
+                                        seekModel.draw(screechModelIdleAnim, currentFrame, 1.0f, 1.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
+                                        last_frame = currentFrame;
+                                    }
+                                    screechAnimTime += 1.0f;
+                                }
+                            }
+                        }
+                        else if (test < 2) {
+                            if (screechModelAttackAnim.numFrames > 0) {
+                                int currentFrame = ((int)screechAnimTime) % screechModelAttackAnim.numFrames;
+                                if (currentFrame < last_frame) {
+                                    sprintf(uiMessage, "animation completed");
+                                    messageTimer = 50;
+                                    test = 2;
+                                    seekModel.draw(screechModelIdleAnim, 1, 1.0f, 1.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
+                                    screechAnimTime = 0.0f;
+                                    last_frame = -1;
+                                }
+                                else {
+                                    if (last_frame != currentFrame) {
+                                        seekModel.draw(screechModelIdleAnim, currentFrame, 1.0f, 1.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
+                                        last_frame = currentFrame;
+                                    }
+                                    screechAnimTime += 1.0f;
+                                }
+                            }
+                        }
+                        else {
+                            last_frame = -1;
+                            screechAnimTime = 0.0f;
+                            seekModel.draw(screechModelIdleAnim, 0, 1.0f, 1.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
+                            test = -1;
+                        }
+                    }
+                    else {
+                        seekModel.draw(seekModel, 0, 1.0f, 1.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
+                    }
+
+                }
+                else if (screechActive) {
+                    // Draw chasing player
+                    static float screechAnimTime = 0.0f;
+                    screechAnimTime += (seekState == 2) ? 0.4f : 0.1f;
+                    if (hasScreechIdleAnim) {
+                        if (screechModelIdleAnim.numFrames > 0) {
+                            int currentFrame = ((int)screechAnimTime) % screechModelIdleAnim.numFrames;
+                            // He now renders at his absolute spatial coords, and calculates rotation to face the player
+                            float targetScreechX = 1.0f;
+                            float targetScreechZ = 0.0f;
+                            float rot = atan2f(camX - targetScreechX, camZ - targetScreechZ);
+                            seekModel.draw(screechModelIdleAnim, currentFrame, targetScreechX, -0.9f + floorCorrectionY, -targetScreechZ, screechScale, 1.0f, rot);
+                        }
+                    }
+                    else {
+                        seekModel.draw(screechModel, 0, 1.0f, 0.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
+                    }
+                }
+            }
+            // -----------------------
+
+
             // --- SEEK GENERATION CALL ---
             seek_mesh.clear(); 
             if (hasSeekModel) { 
@@ -1375,6 +1478,7 @@ int main() {
             ent_col_size = entity_mesh_colored.size();
             ent_tex_size = entity_mesh_textured.size();
             seek_size = seek_mesh.size();
+            screech_size = screech_mesh.size();
             
             if (ent_col_size > MAX_ENTITY_VERTS) ent_col_size = MAX_ENTITY_VERTS;
             if (ent_col_size + ent_tex_size > MAX_ENTITY_VERTS) ent_tex_size = MAX_ENTITY_VERTS - ent_col_size; 
