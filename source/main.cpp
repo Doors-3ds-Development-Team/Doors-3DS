@@ -95,10 +95,13 @@ int main() {
     C3D_RenderTargetSetOutput(target, GFX_TOP, GFX_LEFT, DISPLAY_TRANSFER_FLAGS);
     
     // Texture loading
-    hasAtlas = loadTextureFromFile("romfs:/", "atlas.t3x", &atlasTex);
+    hasAtlas = loadTextureFromFile(Model_Textures, "atlas.t3x", &atlasTex);
     
     C3D_Tex seekTex; 
-    bool hasSeekTex = loadTextureFromFile("romfs:/", "seek.t3x", &seekTex);
+    bool hasSeekTex = loadTextureFromFile(Model_Textures, "seek.t3x", &seekTex);
+
+    C3D_Tex screechTex;
+    bool hasScreechTex = loadTextureFromFile(Model_Textures, "screech.t3x", &screechTex);
 
     // 3D Model Loading
     MD2Model screechModel;
@@ -1276,7 +1279,7 @@ int main() {
                                 }
                                 else {
                                     if (last_frame != currentFrame) {
-                                        screechModel.draw(screechModelIdleAnim, currentFrame, 1.0f, 0.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
+                                        screechModel.draw(screechModelIdleAnim, currentFrame, 0.0f, 0.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
                                         last_frame = currentFrame;
                                     }
                                     screechAnimTime += 1.0f;
@@ -1290,13 +1293,13 @@ int main() {
                                     sprintf(uiMessage, "animation completed");
                                     messageTimer = 50;
                                     test = 2;
-                                    screechModel.draw(screechModelIdleAnim, 1, 1.0f, 0.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
+                                    screechModel.draw(screechModelIdleAnim, 1, 0.0f, 0.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
                                     screechAnimTime = 0.0f;
                                     last_frame = -1;
                                 }
                                 else {
                                     if (last_frame != currentFrame) {
-                                        screechModel.draw(screechModelIdleAnim, currentFrame, 1.0f, 0.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
+                                        screechModel.draw(screechModelIdleAnim, currentFrame, 0.0f, 0.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
                                         last_frame = currentFrame;
                                     }
                                     screechAnimTime += 1.0f;
@@ -1306,12 +1309,12 @@ int main() {
                         else {
                             last_frame = -1;
                             screechAnimTime = 0.0f;
-                            screechModel.draw(screechModelIdleAnim, 0, 1.0f, 0.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
+                            screechModel.draw(screechModelIdleAnim, 0, 0.0f, 0.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
                             test = -1;
                         }
                     }
                     else {
-                        screechModel.draw(screechModel, 0, 1.0f, 0.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
+                        screechModel.draw(screechModel, 0, 0.0f, 0.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
                     }
 
                 }
@@ -1330,7 +1333,7 @@ int main() {
                         }
                     }
                     else {
-                        seekModel.draw(screechModel, 0, 1.0f, 0.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
+                        screechModel.draw(screechModel, 0, 0.0f, 0.0f + floorCorrectionY, 2.0f, screechScale, 1.0f, 3.14159f);
                     }
                 }
             }
@@ -1338,8 +1341,9 @@ int main() {
 
 
             // --- SEEK GENERATION CALL ---
+            bool do_debug_seek_test = false;
             seek_mesh.clear(); 
-            if (hasSeekModel) { 
+            if (hasSeekModel && do_debug_seek_test == true) {
                 float seekScale = 0.16f; // Doubled Size!
                 // Calculate the Y offset needed to keep his feet on the floor when scaling up
                 // (Models usually scale from their center, pushing their feet into the floor)
@@ -1354,7 +1358,6 @@ int main() {
                             if (seekModelIntroClip1.numFrames > 0) {
                                 int currentFrame = ((int)seekAnimTime) % seekModelIntroClip1.numFrames;
                                 if (currentFrame < last_frame) {
-                                    sprintf(uiMessage, "animation completed");
                                     messageTimer = 50;
                                     test = 1;
                                     seekModel.draw(seekModelIntroClip2, 1, 0.0f, 0.0f + floorCorrectionY, 2.0f, seekScale, 1.0f, 3.14159f);
@@ -1374,7 +1377,6 @@ int main() {
                             if (seekModelIntroClip2.numFrames > 0) {
                                 int currentFrame = ((int)seekAnimTime) % seekModelIntroClip2.numFrames;
                                 if (currentFrame < last_frame) {
-                                    sprintf(uiMessage, "animation completed");
                                     messageTimer = 50;
                                     test = 2;
                                     seekModel.draw(seekModelIntroClip3, 1, 0.0f, 0.0f + floorCorrectionY, 2.0f, seekScale, 1.0f, 3.14159f);
@@ -1394,7 +1396,6 @@ int main() {
                             if (seekModelIntroClip3.numFrames > 0) {
                                 int currentFrame = ((int)seekAnimTime) % seekModelIntroClip3.numFrames;
                                 if (currentFrame < last_frame) {
-                                    sprintf(uiMessage, "animation completed");
                                     messageTimer = 50;
                                     test = 3;
                                     seekModel.draw(seekModelIntroClip4, 1, 0.0f, 0.0f + floorCorrectionY, 2.0f, seekScale, 1.0f, 3.14159f);
@@ -1414,7 +1415,6 @@ int main() {
                             if (seekModelIntroClip4.numFrames > 0) {
                                 int currentFrame = ((int)seekAnimTime) % seekModelIntroClip4.numFrames;
                                 if (currentFrame < last_frame) {
-                                    sprintf(uiMessage, "animation completed");
                                     messageTimer = 50;
                                     test = 4;
                                     seekModel.draw(seekModelRunAnim, 1, 0.0f, 0.0f + floorCorrectionY, 2.0f, seekScale, 1.0f, 3.14159f);
