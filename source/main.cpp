@@ -44,6 +44,7 @@ int main() {
     const char* Models = "romfs:/Models/";
     const char* Model_Animations = "romfs:/Models/Animations/";
     const char* Model_Textures = "romfs:/Models/Textures/";
+    const char* Textures = "romfs:/";
 
     const char* Music = "romfs:/Sounds/Music/";
     const char* Misc = "romfs:/Sounds/Misc/";
@@ -95,13 +96,13 @@ int main() {
     C3D_RenderTargetSetOutput(target, GFX_TOP, GFX_LEFT, DISPLAY_TRANSFER_FLAGS);
     
     // Texture loading
-    hasAtlas = loadTextureFromFile(Model_Textures, "atlas.t3x", &atlasTex);
+    hasAtlas = loadTextureFromFile(Textures, "atlas.t3x", &atlasTex);
     
     C3D_Tex seekTex; 
-    bool hasSeekTex = loadTextureFromFile(Model_Textures, "seek.t3x", &seekTex);
+    bool hasSeekTex = loadTextureFromFile(Textures, "seek.t3x", &seekTex);
 
     C3D_Tex screechTex;
-    bool hasScreechTex = loadTextureFromFile(Model_Textures, "screech.t3x", &screechTex);
+    bool hasScreechTex = loadTextureFromFile(Textures, "screech.t3x", &screechTex);
 
     // 3D Model Loading
     MD2Model screechModel;
